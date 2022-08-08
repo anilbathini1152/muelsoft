@@ -1,6 +1,31 @@
 import java.sql.*;
 import java.util.Scanner;
 class DBOperations{
+    public boolean tableExistsSQL(Connection con, String tableName) throws SQLException {
+        PreparedStatement preparedStatement = con.prepareStatement("SELECT count(*) "
+          + "FROM information_schema.tables "
+          + "WHERE table_name = ?"
+          + "LIMIT 1;");
+        preparedStatement.setString(1, tableName);
+    
+        ResultSet resultSet = preparedStatement.executeQuery();
+        resultSet.next();
+        return resultSet.getInt(1) != 0;
+    }
+    public int createTable(Connection con) throws SQLException{
+        String qr="create table movies(movie_name varchar(50),actor varchar(50),actress varchar(50),YOR varchar(4),director varchar(50))";
+        Statement st=con.createStatement();
+        st.execute(qr);
+        if(tableExistsSQL(con, "movies")){
+            System.out.println("Table Creation Successfull");
+            return 1;
+        }
+        else{
+            System.out.println("Table Creation Failed");
+        }
+        return 0;
+
+    }
     public void insert(Connection con,Scanner sc) throws SQLException{
         
         String movie_name,actor,actress,year_of_release,dir_name;
@@ -72,6 +97,7 @@ class Assignment{
                 System.out.println("Error");
             }
             else{
+                if(obj.createTable(con)==1){
                 while(true){
                     System.out.println("Enter 1 for inserting \n Enter 2 for Retrieving all values \n Enter 3 for retrieving the values by actor name \n Enter any other no to exit");
                     sw=sc.nextInt();
@@ -88,6 +114,7 @@ class Assignment{
                         break;
                 }
             }
+        }
             sc.close();
         }
     }
